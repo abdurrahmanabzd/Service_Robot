@@ -8,7 +8,7 @@
   <arg name="z" default="0"/>
   <arg name="roll" default="0"/>
   <arg name="pitch" default="0"/>
-  <arg name="yaw" default="0"/>
+  <arg name="yaw" default="3.1416"/>
 
   <!-- Launch other relevant files-->
   <include file="$(find pick_objects)/launch/robot_description.launch"/>

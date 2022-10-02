@@ -17,7 +17,7 @@
     <!-- initial pose-->
     <param name="initial_pose_x" value="0" />
     <param name="initial_pose_y" value="0" />
-    <param name="initial_pose_a" value="-1.5708"/>
+    <param name="initial_pose_a" value="1.5708"/>
      
     <!-- AMCL parameters-->
     <param name="max_particles" value="1000"/>
