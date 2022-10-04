@@ -1,7 +1,16 @@
 #include <ros/ros.h>
 #include <visualization_msgs/Marker.h>
+#include <nav_msgs/Odometry.h>
 
 using namespace std;
+
+double robot_x, robot_y;
+
+void callback(const nav_msgs::Odometry &odom)
+{
+    robot_x = odom.pose.pose.position.x;
+    robot_y = odom.pose.pose.position.y; 
+} 
 
 int main( int argc, char** argv )
 {
@@ -9,7 +18,8 @@ int main( int argc, char** argv )
     ros::NodeHandle n;
     ros::Rate r(1);
     ros::Publisher marker_pub = n.advertise<visualization_msgs::Marker>("visualization_marker", 1);
-
+    ros::Subscriber sub = n.subscribe("odom",3,callback);
+    bool picked = false;
 
     uint32_t shape = visualization_msgs::Marker::CUBE;
 
@@ -51,23 +61,39 @@ int main( int argc, char** argv )
         }
 
 
-        marker.pose.position.x = 1.5;
-        marker.pose.position.y = 6.0;
-        marker.action = visualization_msgs::Marker::ADD;
-        marker_pub.publish( marker );
-        ros::Duration(5.0).sleep();
+        if(picked==false)
+        {
+           marker.pose.position.x = 1.5;
+           marker.pose.position.y = 6.0;
+           marker.action = visualization_msgs::Marker::ADD;
+           marker_pub.publish(marker);
+           //ros::Duration(5).sleep();
+           ROS_INFO("Object ready to pick up");
+        }
+
+
+        if(robot_x==marker.pose.position.x && robot_y==marker.pose.position.y && picked==false)
+        {
+          marker.action = visualization_msgs::Marker::DELETE;
+          marker_pub.publish( marker );
+          ROS_INFO("Object has been picked up");
+          picked = true;
+          ros::Duration(5.0).sleep();
+          marker.pose.position.x = 3.0;
+          marker.pose.position.y = -1.0;
+        }
         
-        marker.action = visualization_msgs::Marker::DELETE;
-        marker_pub.publish( marker );
-        ros::Duration(5.0).sleep();
+        
+        if(robot_x==marker.pose.position.x && robot_y==marker.pose.position.y && picked==true)
+        {
+          marker.action = visualization_msgs::Marker::ADD;
+          marker_pub.publish( marker );
+          ROS_INFO("Object has been droped");
+        }
 
-        marker.pose.position.x = 3.0;
-        marker.pose.position.y = -1.0;
-        marker.action = visualization_msgs::Marker::ADD;
-        marker_pub.publish( marker );
-        ros::Duration(5.0).sleep();
-
-        break;
+        ros::spinOnce();
+        r.sleep();
+        //break;
     }
 
 
