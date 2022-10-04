@@ -7,5 +7,5 @@ xterm -e "source devel/setup.bash; roslaunch pick_objects amcl.launch" &
 sleep 5
 xterm -e "source devel/setup.bash; roslaunch pick_objects rviz_config.launch" &
 sleep 5
-xterm -e "source devel/setup.bash; rosrun using_markers add_markers"
+xterm -e "source devel/setup.bash; rosrun using_markers add_markers_time"
 

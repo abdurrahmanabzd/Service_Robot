@@ -4,13 +4,15 @@
 
 using namespace std;
 
-double robot_x, robot_y;
+float robot_x, robot_y, robot_w;
 
 void callback(const nav_msgs::Odometry &odom)
 {
     robot_x = odom.pose.pose.position.x;
     robot_y = odom.pose.pose.position.y; 
+    robot_w = odom.pose.pose.orientation.w; 
 } 
+
 
 int main( int argc, char** argv )
 {
@@ -20,6 +22,9 @@ int main( int argc, char** argv )
     ros::Publisher marker_pub = n.advertise<visualization_msgs::Marker>("visualization_marker", 1);
     ros::Subscriber sub = n.subscribe("odom",3,callback);
     bool picked = false;
+    float dist_1, dist_2;
+    //float ang_1, ang_2;
+
 
     uint32_t shape = visualization_msgs::Marker::CUBE;
 
@@ -49,7 +54,7 @@ int main( int argc, char** argv )
         marker.color.b = 0.0f;
         marker.color.a = 1.0f;
 
-        marker.lifetime = ros::Duration(5);
+        marker.lifetime = ros::Duration();
 
         while( marker_pub.getNumSubscribers() < 1 )
         {
@@ -72,28 +77,51 @@ int main( int argc, char** argv )
         }
 
 
-        if(robot_x==marker.pose.position.x && robot_y==marker.pose.position.y && picked==false)
+        while(true)
         {
-          marker.action = visualization_msgs::Marker::DELETE;
-          marker_pub.publish( marker );
-          ROS_INFO("Object has been picked up");
-          picked = true;
-          ros::Duration(5.0).sleep();
-          marker.pose.position.x = 3.0;
-          marker.pose.position.y = -1.0;
-        }
-        
-        
-        if(robot_x==marker.pose.position.x && robot_y==marker.pose.position.y && picked==true)
+          dist_1 = sqrt( pow(robot_x - marker.pose.position.x, 2) + pow(robot_y - marker.pose.position.y, 2) );
+
+          //ang_1 = abs(robot_w - marker.pose.orientation.w);
+
+          //if(dist_1<= 0.3 && ang_1 < M_PI/180)
+          if(dist_1<= 0.3)
+          {
+            marker.action = visualization_msgs::Marker::DELETE;
+            marker_pub.publish( marker );
+            ROS_INFO("Object has been picked up");
+            picked = true;
+            //ros::Duration(5.0).sleep();
+            
+            break;
+           }
+         }
+
+
+        while(picked==true)
         {
-          marker.action = visualization_msgs::Marker::ADD;
-          marker_pub.publish( marker );
-          ROS_INFO("Object has been droped");
-        }
+          dist_2 = sqrt( pow(robot_x - marker.pose.position.x, 2) + pow(robot_y - marker.pose.position.y, 2) );
+
+          //ang_2 = abs(robot_w - marker.pose.orientation.w);
+
+          //if(dist_2<= 0.3 && ang_2 < M_PI/180)
+          if(dist_2<= 0.3)
+          {
+             marker.pose.position.x = 3.0;
+             marker.pose.position.y = -1.0;
+             marker.action = visualization_msgs::Marker::ADD;
+             marker_pub.publish(marker);
+             //ros::Duration(5).sleep();
+             ROS_INFO("Object has been droped");
+
+              break;
+           }
+         }
+        
+       
 
         ros::spinOnce();
         r.sleep();
-        //break;
+        
     }
 
 

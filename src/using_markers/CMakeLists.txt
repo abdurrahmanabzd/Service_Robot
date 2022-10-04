@@ -212,3 +212,6 @@ target_link_libraries(add_markers ${catkin_LIBRARIES})
 
 add_dependencies(add_markers using_markers_generate_messages_cpp)
 
+add_executable(add_markers_time src/add_markers_time.cpp)
+target_link_libraries(add_markers_time ${catkin_LIBRARIES})
+
